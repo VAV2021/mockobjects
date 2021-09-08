@@ -20,7 +20,7 @@ Mock Objects
 ## Mock Object Frameworks (Libraries) for Java
 
 * [Mockito](https://site.mockito.org) the most popular mock framework. Claims to be one of the top-10 testing frameworks for Java.
-* [JMockit](https://jmockit.github.io/) 2nd most popular mock framework. Includes a code-coverage tool. People say "you can mock anything [using EasyMock]", but a slightly longer learning curve than Mockito.
+* [JMockit](https://jmockit.github.io/) 2nd most popular mock framework. Includes a code-coverage tool. People say "you can mock anything [using JMockit]", but a slightly longer learning curve than Mockito.
 * [JMock](https://jmock.org) the first major mock framework for Java. Has excellent documentation.
 * [EasyMock](https://easymock.org)
 * [PowerMock](https://github.com/powermock/powermock) extends other mocking frameworks, including Mockito and EasyMock.  PowerMock uses a custom classloader to enable mocking of static methods, constructors, final classes, private methods, and more -- things that some other frameworks can't do.

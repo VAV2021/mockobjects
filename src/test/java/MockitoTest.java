@@ -83,8 +83,8 @@ public class MockitoTest {
 	 * Verify how many times a method was invoked
 	 */
 	public void testVerifyMethodCalls() {
-		// you would probably do this in a setUp method
 		// Create a mock using code:
 		List<String> list2 = Mockito.mock( java.util.List.class );
+		when(list2.add(any))
 	}
 }

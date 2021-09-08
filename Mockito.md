@@ -16,9 +16,9 @@ dependencies {
 }
 ```
 
-If you need a JAR file of mockito-core, download from: <https://search.maven.org/search> and enter "mockito-core" (or whatever artifact you want).
+If you need a JAR file of mockito-core, download it from: <https://search.maven.org/search> and enter "mockito-core" (or whatever artifact you want).
 
-Warning: download sites may modify jars! Do **not** download from sites such as 
+Warning: download sites may modify jars! Do **not** download from these sites
 * java2s.com
 * findjar.com
 
@@ -120,9 +120,9 @@ String fruit = mockList.get(123);
 assertEqual("any fruit", fruit);
 ```
 
-`anyInt` is a static method in [ArgumentMatchers][]. It matches any integer value passed as an argument.
+`anyInt` is a static method in [ArgumentMatchers][ArgumentMatchers]. It matches any integer value passed as an argument.
 
-[ArgumentMatcher][] static methods:
+[ArgumentMatchers][ArgumentMatchers] static methods:
 
 | Method         | matches       |
 |:---------------|:--------------|
@@ -158,6 +158,8 @@ import static org.mockito.Mockito.*;
 ```
 
 ### ArgumentMatchers can be Lambda expressions
+
+[ArgumentMatchers]: https://site.mockito.org/javadoc/current/org/mockito/ArgumentMatchers.html
 
 Allow the price of a recipe to be any positive value,
 
@@ -216,6 +218,5 @@ Two tutorials with useful content:
 
 
 ---
-[ArgumentMatchers]: https://site.mockito.org/javadoc/current/org/mockito/ArgumentMatchers.html
 
 
