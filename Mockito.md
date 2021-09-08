@@ -126,7 +126,8 @@ assertEqual("any fruit", fruit);
 
 | Method         | matches       |
 |:---------------|:--------------|
-| any()          | match anything |
+| any()          | match anything, including null |
+| any(Class\<T\>)| match any arg of type T, not null |
 | anyBoolean()   | boolean or non-null Boolean |
 | anyDouble()    | double or non-null Double |
 | anyCollection() | any non-null Collection    |

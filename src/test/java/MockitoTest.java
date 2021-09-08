@@ -82,9 +82,34 @@ public class MockitoTest {
 	/**
 	 * Verify how many times a method was invoked
 	 */
+	@Test
 	public void testVerifyMethodCalls() {
 		// Create a mock using code:
 		List<String> list2 = Mockito.mock( java.util.List.class );
-		when(list2.add(any))
+		// add() method has not been called yet
+		verify(list2, never()).add(any());
+		// ok, let's add some items
+		// Since we didn't "fake" this method, the default is return False
+		assertFalse(list2.add("apple"));
+		// now let's "fake" it to return true
+		when(list2.add(any())).thenReturn(true);
+		// what does it return now?
+		assertTrue(list2.add("banana"));
+
+		// verify the method was called twice
+		verify(list2, times(2)).add(any());
+
+		// more specific: we added "apple" and "banana"
+		verify(list2).add("apple");
+		verify(list2).add("banana");
+	}
+
+	/**
+	 * "verify" something that did NOT occur.
+	 * This test should fail.
+	 */
+	@Test
+	public void testMethodNotCalled() {
+		fail("Not done yet");
 	}
 }
