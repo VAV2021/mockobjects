@@ -72,9 +72,8 @@ public class CoffeeMakerTest {
     }
 ```
 
-Instead of calling `MockitoAnnotations.initMocks` you can 
-add this annotation to the class:
-
+You can use the MockitoJUnitRunner instead of
+calling `MockitoAnnotations.initMocks`:
 ```java
 // @RunWith is so Mockito can process it's annotations.
 @Runwith(MockitoJUnitRunner.class)
@@ -88,6 +87,21 @@ public class CoffeeMakerTest {
     public void setUp() {
          // nothing to do
     }
+```
+
+## Mocking Classes with Type Parameters (Generics)
+
+To mock a class with a type parameter, use whichever of these applies:
+
+```java
+     // For mock objects created using annotations
+     @Mock
+     List<String> mocklist;
+
+     
+     // For mocks created using Mockito.mock() use a cast:
+     List<String> anotherlist = (List<String>) Mockito.mock(List.class);
+}
 ```
 
 
@@ -151,9 +165,8 @@ when(mockList.add(0, anyString()))
 when(mockList.add(eq(0), anyString()))
 ```
 
-You usually don't need to `import static org.mockito.ArgumentMatcher.*`
-
-`org.mockito.Mockito` extends `ArgumentMatcher`, so it is enough to write:
+`org.mockito.Mockito` extends `ArgumentMatchers`, 
+so you can get all the static ArgumentMatchers just by importing Mockito as in:
 ```
 import static org.mockito.Mockito.*;
 ```
@@ -195,21 +208,24 @@ verify(mockList).size();
 
 Verify method call with a `VerificationMode` 
 ```java
-verify(mockList
+// add method was called twice
+verify(mockList, times(2)).add(any());
+```
 
 `VerificationModes` are:
-* `times(int)` - called exactly this many times
-* `atLeast(int)` - called at least this many times
-* `atMost(int)` - called at least this many times
-* `atLeastOnce()` - same as `atLeast(1)`
-* `never()`
+| verifier      |  meaning                        |
+|:--------------|:--------------------------------|
+| `times(int)`  |  called exactly this many times |
+| `atLeast(int)` | called at least this many times|
+| `atMost(int)` | called at least this many times |
+| `atLeastOnce()` | same as `atLeast(1)` |
+| `never()` | never called |
 
 
 
 ## Resources
 
-Best page to learn mocking by example in the Mockito Javadoc:
-
+Best page for examples of using Mockito is the official Javadoc:
 <https://site.mockito.org/javadoc/current/org/mockito/Mockito.html>
 
 Two tutorials with useful content:

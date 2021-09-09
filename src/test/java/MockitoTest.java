@@ -11,47 +11,157 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Some tests using Mockito to mock classes in the Java API.
+ *
+ * @see https://site.mockito.org/javadoc/current/org/mockito/Mockito.html
+ */
 
-// @RunWith is so Mockito can process it's annotations.
-// Instead I use MockitoAnnotations.initMocks
+// @RunWith is one way to enable Mockito to process it's annotations.
+// Instead I use MockitoAnnotations.initMocks(this) in the setUp method.
 // @RunWith(MockitoJUnitRunner.class)
 public class MockitoTest {
 	@Mock
 	List<String> list;
 
+	/**
+	 * Initialize attributes annotated with \@Mock.
+ 	 * This ensures a new mock is created for each test.
+	 */
 	@Before
 	public void setUp() {
-		// initialize annotated @Mock objects before each test.
-		// this method is now deprecated
 		MockitoAnnotations.initMocks(this);
 	}
+
 	/**
-	 * Initialize a mock object using annotations.
-	 * This test uses a Mock list (above).
+	 * Test that the test fixture was initialized (mocked),
+	 * and that it 'mocks' all list methods with some default values. 
+	 *
+	 * Mockito will mock all methods.
+	 * The default behavior is to return false, 0, or null for object refs.
 	 */
 	@Test
-	public void testFakeGet() {
-        // it really was mocked
+	public void testInitializedMock() {
+        // it really was initialized (mocked)
 		assertNotNull(list);
-		
-		when(list.get(0)).thenReturn("zero");
-		when(list.get(1)).thenReturn("one");
-		
-		assertEquals("one", list.get(1));
-		assertEquals("zero", list.get(0));
-		// can we get the same value again?
-		assertEquals("one", list.get(1));
-		// we didn't program this, so the default value is 0
-		assertEquals(0, list.size());
-		// we didn't program this, so the default value is false
-		assertFalse(list.contains("one"));
 
-		// verify that methods were called (any number of times)
-		verify(list).get(0);
-		verify(list).size();
+		// default is to return false, 0, or null (for object references)
+		assertEquals(0, list.size());
+		assertFalse(list.isEmpty());    // actually it _is_ empty :-)
+		// the mock returns false by default.
+		// a real list would add elements and return true for all of these:
+		assertFalse(list.add("foo"));
+		assertFalse(list.contains("foo"));
+		assertFalse(list.remove("foo"));
+
+		// methods that return an object reference will return null
+		assertNull(list.get(0));
+		// it doesn't care if the method argument is ridiculous
+		assertNull(list.get(1_000_000_000));
+		assertNull(list.get(-1));
 	}
 
 	/**
+	 * Program the mock object to return some "fake" results.
+	 * After calling the mocked methods, use verify() to test
+	 * that the methods were actually called.
+	 */
+	@Test
+	public void testFakeResults() {
+
+		// programming the mock object
+		when(list.get(0)).thenReturn("zero");
+
+		// program to return a different result each time it is called.
+		// first time return "one", next return "ichi", then return "neung".
+		when(list.get(1))
+				.thenReturn("one")
+				.thenReturn("ichi")	
+				.thenReturn("neung");
+		
+		assertEquals("zero", list.get(0));
+		assertEquals("one",  list.get(1));
+		assertEquals("ichi", list.get(1));
+		assertEquals("neung",list.get(1));
+		// get(0) should always return the same value
+		assertEquals("zero", list.get(0));
+
+		// we didn't 'fake' this, so the default value is 0
+		assertEquals(0, list.size());
+		// we didn't 'fake' this, so the default value is false
+		// even though we DID add "one" to the mock list.
+		assertFalse(list.contains("one"));
+
+		// ok, let's fake it now...
+		when(list.contains("one")).thenReturn(true);
+		assertTrue(list.contains("one"));
+
+		// verify which methods were called
+		verify(list).get(0);
+		verify(list).get(1);
+		verify(list).size();
+		// verify a method was called with *any* arguments
+		verify(list).contains(any());
+	}
+
+	/**
+	 * Program a mock using conditions on the arguments.
+	 * This uses ArgumentMatchers to specify conditions that an
+	 * argument to a mocked method should match.
+	 *
+	 * There are 2 special matchers worth noting:
+	 * <pre>
+	 *   argThat( custom_matcher )  // can use a lambda expression
+	 *   matches( regex )           // match a regular expression
+	 * </pre>
+	 * The Mockito class extends ArgumentMatcher, so you can access
+	 * all the static ArgumentMatchers methods using
+	 * <tt>import static org.mockito.Mockito.*;</tt>
+	 *
+	 * @see https://site.mockito.org/javadoc/current/org/mockito/ArgumentMatchers.html
+	 */
+	@Test
+	public void testProgrammableResults() {
+		// any string argument ending with "coffee" has index 1
+		when( list.indexOf(endsWith("coffee")) )
+				.thenReturn(1);
+		// any string argument beginning with "Thai" has index 5
+		when( list.indexOf(startsWith("Thai")) )
+				.thenReturn(5);
+
+		assertEquals(1, list.indexOf("Espresso coffee"));
+		assertEquals(1, list.indexOf("Kenyan coffee"));
+		assertEquals(1, list.indexOf("Starbucks coffee"));
+		assertEquals(0, list.indexOf("Starbucks"));         // should not match
+		assertEquals(0, list.indexOf("Starbucks Coffee"));  // should not match
+
+		assertEquals(5, list.indexOf("Thai food"));
+		assertEquals(5, list.indexOf("Thailand"));
+
+		// ambiguous: this argument matches both patterns
+		assertEquals(5, list.indexOf("Thai coffee"));
+	}
+
+	/**
+	 * Program using a lambda expression.
+	 * Usage:  mock.methodname(argThat( lambda_expression ))
+	 */
+	@Test
+	public void testProgramWithLambda() {
+		// if list.get(n) is called with an odd number, return "odd"
+		when(list.get( argThat(n -> n%2 == 1) )).thenReturn("odd");
+		// if list.get(n) is called with an even number, return "EVEN"
+		when(list.get( argThat(n -> n%2 == 0) )).thenReturn("EVEN");
+
+		assertEquals("odd", list.get(7));
+		assertEquals("EVEN", list.get(4));
+		assertEquals("EVEN", list.get(0));
+		// in a real list, this would throw IndexOutOfBoundsException
+		assertEquals("odd", list.get(-1));
+	}
+
+	/**
+	 * Program a mock to throw exception, based on a condition.
 	 * You cannot call list.get(n) with n < 0.
 	 * It should throw IllegalArgumentException.
 	 */
@@ -80,28 +190,38 @@ public class MockitoTest {
 	}
 
 	/**
-	 * Verify how many times a method was invoked
+	 * Create a mock object using Mockito.mock() instead of annotations.
+	 * Verify how many times a method was invoked.
+	 *
+	 * The verify method is overloaded:
+	 * 1. verify a method was called at least once:
+	 *    verify(mockobject).method(arg) 
+	 * 2. verify using a condition on how many times method was called:
+	 *    verify(mockobject, condition).method(arg)
+	 *    verify(mockobject, never()).method()
+	 *    verify(mockobject, times(3)).method()    -- invoked 3 times
+	 *    verify(mockobject, atMost(2)).method()   -- at most 2 times
 	 */
 	@Test
 	public void testVerifyMethodCalls() {
 		// Create a mock using code:
-		List<String> list2 = Mockito.mock( java.util.List.class );
+		List<String> mocklist = Mockito.mock( java.util.List.class );
 		// add() method has not been called yet
-		verify(list2, never()).add(any());
+		verify(mocklist, never()).add(any());
 		// ok, let's add some items
-		// Since we didn't "fake" this method, the default is return False
-		assertFalse(list2.add("apple"));
-		// now let's "fake" it to return true
-		when(list2.add(any())).thenReturn(true);
-		// what does it return now?
-		assertTrue(list2.add("banana"));
+		mocklist.add("apple");
+		mocklist.add("banana");
 
-		// verify the method was called twice
-		verify(list2, times(2)).add(any());
+		// verify the 'add' method was called twice
+		verify(mocklist, times(2)).add(any());
 
-		// more specific: we added "apple" and "banana"
-		verify(list2).add("apple");
-		verify(list2).add("banana");
+		// verify 'add' invoked with specific arguments
+		verify(mocklist).add("apple");
+		verify(mocklist).add("banana");
+		// should have invoked add("apple") only 1 time
+		verify(mocklist, times(1)).add("apple");
+		// the code did not call 'remove'
+		verify(mocklist, never()).remove(any());
 	}
 
 	/**
@@ -109,7 +229,9 @@ public class MockitoTest {
 	 * This test should fail.
 	 */
 	@Test
-	public void testMethodNotCalled() {
-		fail("Not done yet");
+	public void testVerifyShouldFail() {
+		list.add("coffee");
+		// Of course I would NEVER add chocolate to a list.
+		verify(list).add("chocolate");
 	}
 }

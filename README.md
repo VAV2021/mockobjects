@@ -2,9 +2,9 @@
 
 This repository contains some notes and examples of mock objects using the Mockito framework.
 
-[Mock Objects](Mock-objects.md) brief review and frameworks for Java
+[Mock Objects](mock-objects.md) brief review and frameworks for Java
 
-[Using Mockito](Mockito.md) my notes on using Mockito
+[Using Mockito](using-mockito.md) my notes on using Mockito
 
 [Mockito Javadoc][Mockito-API] for the [Mockito][Mockito-API] class contains many examples of how to use it.  It's the most useful "how to" I have found.
 
