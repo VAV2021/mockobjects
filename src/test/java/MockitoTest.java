@@ -97,11 +97,11 @@ public class MockitoTest {
 		assertTrue(list.contains("one"));
 
 		// verify which methods were called
-		verify(list).get(0);
-		verify(list).get(1);
+		verify(list, times(2)).get(0);
+		verify(list, times(3)).get(1);
 		verify(list).size();
 		// verify a method was called with *any* arguments
-		verify(list).contains(any());
+		verify(list, times(2)).contains(any());
 	}
 
 	/**
@@ -149,15 +149,24 @@ public class MockitoTest {
 	@Test
 	public void testProgramWithLambda() {
 		// if list.get(n) is called with an odd number, return "odd"
-		when(list.get( argThat(n -> n%2 == 1) )).thenReturn("odd");
+		when(list.get( intThat(n -> n%2 == 1) )).thenReturn("odd");
 		// if list.get(n) is called with an even number, return "EVEN"
-		when(list.get( argThat(n -> n%2 == 0) )).thenReturn("EVEN");
+		when(list.get( intThat(n -> n%2 == 0) )).thenReturn("EVEN");
+		// if list.get(n) is called with a negative number, throw IllegalArgumentException
+		when(list.get( intThat(n -> n < 0) )).thenThrow(IllegalArgumentException.class);
 
 		assertEquals("odd", list.get(7));
 		assertEquals("EVEN", list.get(4));
 		assertEquals("EVEN", list.get(0));
 		// in a real list, this would throw IndexOutOfBoundsException
-		assertEquals("odd", list.get(-1));
+		boolean exceptionNotThrown = true;
+		try {
+			String s = list.get(-1);
+		}
+		catch(IllegalArgumentException ex) {
+			exceptionNotThrown = false;
+		}
+		if (exceptionNotThrown) fail("list.get(-1) should throw exception");
 	}
 
 	/**
@@ -231,7 +240,8 @@ public class MockitoTest {
 	@Test
 	public void testVerifyShouldFail() {
 		list.add("coffee");
-		// Of course I would NEVER add chocolate to a list.
+		// Of course you would NEVER add chocolate to a list.
+		// this should cause the test to fail.
 		verify(list).add("chocolate");
 	}
 }

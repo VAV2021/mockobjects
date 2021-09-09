@@ -37,31 +37,27 @@ import org.mockito.Mockito;
 
 public class CoffeeMakerTest {
     // test fixture objects
-    List list;
     Recipe recipe;
+    List list;
 
     @Before
     public void setUp() {
         recipe = Mockito.mock(Recipe.class); // mock a concrete class
-        list = Mockito.mock(List.class);     // mock an interface implementation
+        list = Mockito.mock(List.class);     // mock using interface 
     }
 ```
 
 Usage:
-```
-Mockito.mock(Class<T> classToMock)
 
-returns: ClassToMock object (a mocked subclass)
-```
+    Mockito.mock(Class<T> classToMock)
+    returns: ClassToMock object (a mocked subclass)
 
-2. `@Mock` annotation plus activation.  It's not enough to simply write `@Mock`.
+2. `@Mock` annotation plus injection using `initMocks`.
 ```java
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 
 public class CoffeeMakerTest {
-    @Mock
-    List list;
     @Mock
     Recipe recipe;
 
@@ -75,11 +71,8 @@ public class CoffeeMakerTest {
 You can use the MockitoJUnitRunner instead of
 calling `MockitoAnnotations.initMocks`:
 ```java
-// @RunWith is so Mockito can process it's annotations.
 @Runwith(MockitoJUnitRunner.class)
 public class CoffeeMakerTest {
-    @Mock
-    List list;
     @Mock
     Recipe recipe;
 
@@ -97,13 +90,11 @@ To mock a class with a type parameter, use whichever of these applies:
      // For mock objects created using annotations
      @Mock
      List<String> mocklist;
-
      
      // For mocks created using Mockito.mock() use a cast:
      List<String> anotherlist = (List<String>) Mockito.mock(List.class);
 }
 ```
-
 
 ## Mocking Method Calls and Fake Return Value
 
@@ -148,6 +139,7 @@ assertEqual("any fruit", fruit);
 | anyCollectionOf(Class\<T\> clazz) | collection of type T |
 | anyList(Class\<T\> clazz) | any non-null List    |
 | argThat(matcher) | custom ArgumentMatcher    |
+| intThat(matcher) | custom matcher for int argument |
 | doubleThat(matcher\<Double\>) | custom ArgumentMatcher\<Double\>     |
 | eq(value)                  | argument equals value                   |
 | contains(String substring) | String argument containing substring    |
@@ -184,7 +176,6 @@ Recipe recipe = Mockito.mock(Recipe.class);
 when(recipe.setPrice(argThat(value -> Integer.parseInt(value) > 0)))
 // or
 when(recipe.setPrice(stringThat(value -> Integer.parseInt(value) > 0)))
-
 ```
 
 ### Other Results of `when()`
@@ -200,19 +191,25 @@ Create smarter stub method: `when(recipe.something(anyArg())).thenAnswer(...)`
 Verify a method was called.  If not, an exception is raised.
 
 ```java
-// these methods should have been called
-verify(mockList).add(0);
-verify(mockList).add(1);
+mockList = mock(java.util.List);
+mockList.add("apple");
+mockList.add("grape");
+mockList.size();  // returns 0
+// these methods should have been called exactly once
+verify(mockList).add("apple");
+verify(mockList).add("grape");
 verify(mockList).size();
 ```
 
-Verify method call with a `VerificationMode` 
+Verify method call with a VerificationMode (2nd parameter)
 ```java
-// add method was called twice
+// add method was invoked twice
 verify(mockList, times(2)).add(any());
+// size() method was not invoked
+verify(mockList, never()).size();
 ```
 
-`VerificationModes` are:
+**VerificationModes** are:
 | verifier      |  meaning                        |
 |:--------------|:--------------------------------|
 | `times(int)`  |  called exactly this many times |
@@ -225,7 +222,7 @@ verify(mockList, times(2)).add(any());
 
 ## Resources
 
-Best page for examples of using Mockito is the official Javadoc:
+Best page for examples of using Mockito is the Mockito Javadoc:
 <https://site.mockito.org/javadoc/current/org/mockito/Mockito.html>
 
 Two tutorials with useful content:

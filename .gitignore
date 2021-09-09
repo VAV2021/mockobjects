@@ -7,7 +7,10 @@ out/
 .DS_[Ss]tore
 *.log
 .gradle
+# can recreate these using "gradle wrapper"
 gradle/
+gradlew
+gradlew.bat
 # Python files
 __pycache__
 *.pyc
